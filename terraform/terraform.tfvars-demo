@@ -1,0 +1,12 @@
+aws_access_key         = ""
+aws_secret_key         = ""
+vpc_id                 = ""
+private_subnet_ids     = ["subnet-", "subnet-"]
+public_subnet_ids      = ["subnet-", "subnet-"]
+#ssh_key_name = ""  
+eks_cluster_name       = ""
+node_group_name        = ""
+app_desired_capacity   = 2
+app_max_size           = 3
+app_min_size           = 1
+

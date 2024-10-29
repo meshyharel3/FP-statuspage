@@ -17,6 +17,9 @@ resource "aws_eks_node_group" "node_group_application" {
   node_group_name = "${var.node_group_name}-application"
   node_role_arn   = aws_iam_role.eks_node_role.arn
   subnet_ids      = aws_subnet.private_subnet[*].id
+  # Specify the key_name for SSH access
+
+  #key_name = var.ssh_key_name  # Add this line
 
   scaling_config {
     desired_size = var.app_desired_capacity

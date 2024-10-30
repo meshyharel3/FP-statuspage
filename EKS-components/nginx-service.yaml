@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  labels:
+    app: nginx           # Ensure the label matches the selector in the ServiceMonitor
+spec:
+  type: LoadBalancer
+  selector:
+    app: nginx
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80     
+      targetPort: 80  
+    - name: https  
+      protocol: TCP
+      port: 443     # The service port for HTTPS
+      targetPort: 443  # The target port on the pod
+  

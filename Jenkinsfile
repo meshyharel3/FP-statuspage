@@ -23,7 +23,8 @@ pipeline {
                         sh 'aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO'
                         
                         // Build the statuspage Docker image
-                        sh 'docker build -t statuspage:latest ./statuspage'  
+                        sh 'docker build -t statuspage:latest /opt/statuspage'  
+                        
                         // Tag and push the image to ECR
                         sh 'docker tag statuspage:latest $ECR_REPO:statuspage'
                         sh 'docker push $ECR_REPO:statuspage'
@@ -40,7 +41,7 @@ pipeline {
                         sh 'aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO'
 
                         // Build the Nginx Docker image
-                        sh 'docker build -t nginx:latest -f Dockerfile-nginx .'  // Adjust the path as necessary
+                        sh 'docker build -t nginx:latest -f /opt/statuspage/statuspage/Dockerfile-nginx /opt/statuspage'  
 
                         // Tag and push the image to ECR
                         sh 'docker tag nginx:latest $ECR_REPO:nginx'

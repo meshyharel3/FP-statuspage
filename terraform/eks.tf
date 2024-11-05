@@ -109,10 +109,15 @@ resource "aws_eks_cluster" "my_cluster" {
   role_arn = aws_iam_role.eks_role.arn
 
   vpc_config {
-    subnet_ids            = var.private_subnet_ids
-    security_group_ids    = [aws_security_group.eks_sg.id]
+    subnet_ids              = var.private_subnet_ids
+    security_group_ids      = [aws_security_group.eks_sg.id]
     endpoint_private_access = true
     endpoint_public_access  = false
+  }
+
+  access_config {
+    authentication_mode                         = "API"
+    bootstrap_cluster_creator_admin_permissions = true
   }
 
   depends_on = [aws_iam_role_policy_attachment.eks_policy]
@@ -155,6 +160,32 @@ resource "aws_iam_role_policy_attachment" "ecr_readonly_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
 
+# Inline Policy for Additional Node Permissions
+resource "aws_iam_role_policy" "eks_custom_node_policy" {
+  name = "eksNodeCustomPolicy"
+  role = aws_iam_role.eks_node_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "ec2:DescribeInstances",
+          "ec2:DescribeVpcs",
+          "ec2:DescribeSubnets",
+          "ec2:DescribeSecurityGroups",
+          "eks:DescribeCluster",
+          "eks:ListClusters",
+          "eks:ListNodegroups",
+          "eks:DescribeNodegroup"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      }
+    ]
+  })
+}
+
 # Node Group for Application
 resource "aws_eks_node_group" "node_group_application" {
   cluster_name    = aws_eks_cluster.my_cluster.name
@@ -165,22 +196,6 @@ resource "aws_eks_node_group" "node_group_application" {
   scaling_config {
     desired_size = 2  # Change these values as needed
     max_size     = 3
-    min_size     = 1
-  }
-
-  depends_on = [aws_eks_cluster.my_cluster]
-}
-
-# Node Group for Monitoring
-resource "aws_eks_node_group" "node_group_monitoring" {
-  cluster_name    = aws_eks_cluster.my_cluster.name
-  node_group_name = "${var.node_group_name}-monitoring"
-  node_role_arn   = aws_iam_role.eks_node_role.arn
-  subnet_ids      = [var.private_subnet_ids[0]]  # Only in the first AZ
-
-  scaling_config {
-    desired_size = 1  # Change these values as needed
-    max_size     = 1
     min_size     = 1
   }
 
